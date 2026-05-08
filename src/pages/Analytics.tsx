@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { BarChart3, Calendar, Download, TrendingUp, Users, MessageSquare, Send, DollarSign } from 'lucide-react';
+import { BarChart3, Calendar, Download, TrendingUp, Users, MessageSquare, Send, DollarSign, FileText, Tag, Wrench, Image, Settings as SettingsIcon } from 'lucide-react';
 import { logger } from '../utils/logger';
+import AdminOffers from '../components/admin/AdminOffers';
+import AdminServices from '../components/admin/AdminServices';
+import AdminTestimonials from '../components/admin/AdminTestimonials';
+import AdminHero from '../components/admin/AdminHero';
+import AdminSettings from '../components/admin/AdminSettings';
+
+type Tab = 'leads' | 'messaging' | 'offers' | 'services' | 'testimonials' | 'hero' | 'settings';
 
 interface WhatsAppLead {
   id: string;
@@ -22,7 +29,7 @@ interface OfferStats {
 }
 
 export default function Analytics() {
-  const [activeTab, setActiveTab] = useState<'leads' | 'messaging'>('leads');
+  const [activeTab, setActiveTab] = useState<Tab>('leads');
   const [leads, setLeads] = useState<WhatsAppLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState({
@@ -211,42 +218,52 @@ ${leads.map((lead, index) =>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-4">
             <BarChart3 className="w-8 h-8" />
-            <h1 className="text-4xl font-bold">WhatsApp Analytics</h1>
+            <h1 className="text-4xl font-bold">Admin Dashboard</h1>
           </div>
           <p className="text-xl text-gray-300 mb-6">
-            Track and analyze WhatsApp performance
+            Analytics, content management, and site settings
           </p>
 
-          <div className="flex gap-4">
-            <button
-              onClick={() => setActiveTab('leads')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                activeTab === 'leads'
-                  ? 'bg-white text-gray-900'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              <Users className="w-5 h-5" />
-              Offer Leads
-            </button>
-            <button
-              onClick={() => setActiveTab('messaging')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                activeTab === 'messaging'
-                  ? 'bg-white text-gray-900'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
-            >
-              <MessageSquare className="w-5 h-5" />
-              Daily Messaging
-            </button>
+          <div className="flex flex-wrap gap-2">
+            {([
+              { key: 'leads', label: 'Offer Leads', icon: Users },
+              { key: 'messaging', label: 'Daily Messaging', icon: MessageSquare },
+              { key: 'offers', label: 'Offers', icon: Tag },
+              { key: 'services', label: 'Services', icon: Wrench },
+              { key: 'testimonials', label: 'Testimonials', icon: FileText },
+              { key: 'hero', label: 'Hero Slides', icon: Image },
+              { key: 'settings', label: 'Site Settings', icon: SettingsIcon },
+            ] as const).map((t) => {
+              const Icon = t.icon;
+              const active = activeTab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setActiveTab(t.key)}
+                  className={`px-4 py-2.5 rounded-lg font-medium transition-all flex items-center gap-2 text-sm ${
+                    active
+                      ? 'bg-white text-gray-900'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {t.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
 
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {activeTab === 'leads' ? (
+          {activeTab === 'offers' && <AdminOffers />}
+          {activeTab === 'services' && <AdminServices />}
+          {activeTab === 'testimonials' && <AdminTestimonials />}
+          {activeTab === 'hero' && <AdminHero />}
+          {activeTab === 'settings' && <AdminSettings />}
+
+          {activeTab === 'leads' && (
             <>
               <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end justify-between">
@@ -401,7 +418,8 @@ ${leads.map((lead, index) =>
             )}
           </div>
             </>
-          ) : (
+          )}
+          {activeTab === 'messaging' && (
             <>
               <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end justify-between">
